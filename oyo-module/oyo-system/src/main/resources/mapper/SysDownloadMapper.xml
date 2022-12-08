@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.yrvics.system.download.mapper.SysDownloadMapper">
+    <sql id="base_column">
+        id, title, type, url, request_url, request_method, creator_id, creator_name, download_status, expire_status, param_json, request_json, remark, end_time, ctime, utime, module_id, bu_id, tenant_id
+    </sql>
+
+
+    <select id="page" resultType="cn.yrvics.system.download.entity.SysDownload">
+        select
+        <include refid="base_column"/>
+        from sys_download
+        <where>
+            <if test="memberId !=null">
+                and creator_id = #{memberId}
+            </if>
+            <if test="status !=null and status.size() > 0">
+                and download_status in
+                <foreach collection="status" item="item" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="type !=null">
+                and type =#{type}
+            </if>
+            <if test="searchStr != null">
+                and title like concat('%',#{searchStr},'%')
+            </if>
+        </where>
+        order by ctime
+    </select>
+    <select id="getByCreatorIdAndStatus" resultType="cn.yrvics.system.download.entity.SysDownload">
+        select <include refid="base_column"/> from sys_download
+        where creator_id = #{memberId}
+        <if test="status !=null and status.size() > 0">
+            and download_status in
+            <foreach collection="status" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+</mapper>

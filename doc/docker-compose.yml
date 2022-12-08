@@ -1,0 +1,53 @@
+version: '3.9'
+services:
+  mysql:
+    image: mysql:8.0.25
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - "/docker/mysql/log:/var/log/mysql"
+      - "/docker/mysql/data:/var/lib/mysql"
+      - "/docker/mysql/conf:/etc/mysql/conf.d"
+    environment:
+      - "MYSQL_ROOT_PASSWORD=123456"
+    networks:
+      - "oyo_network"
+
+  redis:
+    image: redis:6.0.8
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - "/docker/redis/redis.conf:/etc/redis/redis.conf"
+      - "/docker/redis/data:/data"
+    networks:
+      - "oyo_network"
+    command: "redis-server /etc/redis/redis.conf"
+
+  nacos:
+    image: nacos/nacos-server:2.0.2
+    container_name: nacos
+    ports:
+      - "8848:8848"
+    environment:
+      - "PREFER_HOST_MODE=hostname"
+      - "JVM_XMS=256m"
+      - "JVM_XMX=256m"
+      - "JVM_XMN=128m"
+      - "MODE=standalone"
+      - "SPRING_DATASOURCE_PLATFORM=mysql"
+      - "MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+      - "MYSQL_SERVICE_HOST=mysql"
+      - "MYSQL_SERVICE_PORT=3306"
+      - "MYSQL_SERVICE_USER=root"
+      - "MYSQL_SERVICE_PASSWORD=123456"
+      - "MYSQL_SERVICE_DB_NAME=nacos_config"
+    networks:
+      - "oyo_network"
+    depends_on:
+      - mysql
+
+networks:
+  oyo_network:
